@@ -13,8 +13,15 @@ import controle.Constantes;
 
 public class Ladrao extends ProgramaLadrao {
 
-	/** Posicao do poupador */
+	/** Posição de poupadores no campo de visão do agente ladrão */
 	private List<Integer> posicaoPoupador;
+
+	/**
+	 * Posição do rastro de um poupador no campo de visão do agente ladrão
+	 * posicaoRastroPoupador = -1 Nenhum Rastro encontrado 
+	 * posicaoRastroPoupador >= 0 Rastro encontrado
+	 */
+	private Integer posicaoRastroPoupador;
 
 	public int acao() {
 
@@ -60,6 +67,7 @@ public class Ladrao extends ProgramaLadrao {
 					// Se forem os outros pontos
 					seguir = Heuristica.sondarCaminho(visao[indexPNoMapa]);
 				}
+				
 				// Se permitir seguir
 				if (seguir) {
 					// Inicia o Calculo da Heuristica
@@ -95,9 +103,16 @@ public class Ladrao extends ProgramaLadrao {
 
 			// retorna a decisao
 			return decisao;
-		}
+			
+		} else if ((posicaoRastroPoupador = buscarRastroPoupadorCampoVisaoAgenteLadrao(olfato)) >= 0) { // Verifica o olfato do agente ladrão
 
-		return (int) (Math.random() * 5);
+			return (int) (Math.random() * 5);			
+			
+		} else { // Anda aleatoriamente
+			
+			return (int) (Math.random() * 5);
+			
+		}
 	}
 
 	/*
@@ -111,6 +126,34 @@ public class Ladrao extends ProgramaLadrao {
 				posicaoPoupador.add(i);
 			}
 		}
+	}
+
+	/**
+	 * busca o rastro de agentes poupadores dentro do olfato do ladrao e retorna
+	 * um valor determinando se encontrou o rastro:
+	 * 
+	 * return = -1 Nenhum Rastro encontrado 
+	 * return >= 0 Rastro encontrado
+	 * 
+	 * @param olfato
+	 *            List de inteiros do campo de olfato do agente ladrão
+	 * @return
+	 */
+	private Integer buscarRastroPoupadorCampoVisaoAgenteLadrao(int[] olfato) {
+
+		Integer maiorProximidade = 0;
+		Integer indice = -1;
+
+		for (int i = 0; i < olfato.length; i++) {
+			if (olfato[i] >= 1 && olfato[i] <= 5
+					&& (olfato[i] > 0 && olfato[i] < maiorProximidade)) {
+				maiorProximidade = olfato[i];
+				indice = i;
+			}
+		}
+
+		return indice;
+
 	}
 
 	/*
