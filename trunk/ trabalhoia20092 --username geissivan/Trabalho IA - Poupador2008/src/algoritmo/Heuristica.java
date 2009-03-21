@@ -13,7 +13,7 @@ public class Heuristica {
 	private static List<Point> passosLadrao;
 
 	/*
-	 * Carrega do mapa de visao do ladrao
+	 * Carrega mapa de visao do ladrao
 	 */
 	public static void carregaMapa() {
 		visionMap = new ArrayList<Point>();
@@ -40,8 +40,13 @@ public class Heuristica {
 			result = true;
 		}
 		// ignora o resto
-		
+
 		return result;
+	}
+
+	public static Integer distanciaManhattan(Point a, Point b) {
+		return new Double(Math.abs(a.getX() - b.getX())).intValue()
+				+ new Double(Math.abs(a.getY() - b.getY())).intValue();
 	}
 
 	/*
@@ -70,5 +75,9 @@ public class Heuristica {
 
 	public static Integer getIndexOfPointOnVisionMap(Point p) {
 		return visionMap.indexOf(p);
+	}
+
+	public static Point getPointFromVisionMap(Integer index) {
+		return visionMap.get(index);
 	}
 }
