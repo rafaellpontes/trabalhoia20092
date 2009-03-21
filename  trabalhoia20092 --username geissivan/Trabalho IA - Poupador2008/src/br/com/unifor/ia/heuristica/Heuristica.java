@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controle.Constantes;
-import controle.Controlador;
 
 public class Heuristica {
 
@@ -13,7 +12,7 @@ public class Heuristica {
 	private static List<Point> passosLadrao;
 
 	/*
-	 * Carrega do mapa de visao do ladrao
+	 * Carregar mapa de visao do ladrao
 	 */
 	public static void carregaMapa() {
 		visionMap = new ArrayList<Point>();
@@ -48,10 +47,11 @@ public class Heuristica {
 	 * Carrega os possiveis movimentos do ladrao
 	 */
 	public static void carregaPassosLadrao() {
-		Point p1 = new Point(2, 3);
-		Point p2 = new Point(3, 2);
-		Point p3 = new Point(3, 4);
-		Point p4 = new Point(4, 3);
+		
+		Point p1 = new Point(2, 3); //(ESQUERDA)
+		Point p2 = new Point(3, 2); //(SUBIR)
+		Point p3 = new Point(3, 4);	//(DESCER)
+		Point p4 = new Point(4, 3); //(DIREITA)
 
 		passosLadrao = new ArrayList<Point>();
 		passosLadrao.add(p1);
@@ -59,7 +59,19 @@ public class Heuristica {
 		passosLadrao.add(p3);
 		passosLadrao.add(p4);
 	}
+	
+	public static Point getPointFromVisionMap(Integer index) {
+		return visionMap.get(index);
+	}
 
+	/**
+	 * Calculo da distancia manhattan
+	 * */
+	public static Integer distanciaManhattan(Point a, Point b) {
+		return new Double(Math.abs(a.getX() - b.getX())).intValue()
+				+ new Double(Math.abs(a.getY() - b.getY())).intValue();
+	}
+	
 	public static List<Point> getPassosLadrao() {
 		return passosLadrao;
 	}
