@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import br.com.unifor.ia.heuristica.Heuristica;
+
 import controle.Constantes;
 
 public class Ladrao extends ProgramaLadrao {
