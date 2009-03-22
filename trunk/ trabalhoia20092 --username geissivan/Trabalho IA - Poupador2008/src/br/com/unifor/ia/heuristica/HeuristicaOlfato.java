@@ -6,18 +6,18 @@ import java.util.List;
 
 import controle.Constantes;
 
-public class Heuristica {
+public class HeuristicaOlfato {
 
 	private static List<Point> visionMap;
 	private static List<Point> passosLadrao;
 
 	/*
-	 * Carregar mapa de visao do ladrao
+	 * Carregar mapa de olfato do ladrao
 	 */
 	public static void carregaMapa() {
 		visionMap = new ArrayList<Point>();
-		for (int i = 0; i < 5; i++) {
-			for (int j = 0; j < 5; j++) {
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
 				Point p = new Point();
 				p.setLocation(i + 1, j + 1);
 				visionMap.add(p);
@@ -48,10 +48,10 @@ public class Heuristica {
 	 */
 	public static void carregaPassosLadrao() {
 		
-		Point p1 = new Point(2, 3); //(ESQUERDA)
-		Point p2 = new Point(3, 2); //(SUBIR)
-		Point p3 = new Point(3, 4);	//(DESCER)
-		Point p4 = new Point(4, 3); //(DIREITA)
+		Point p1 = new Point(2, 1); //(ESQUERDA)
+		Point p2 = new Point(1, 2); //(SUBIR)
+		Point p3 = new Point(3, 2);	//(DESCER)
+		Point p4 = new Point(2, 3); //(DIREITA)
 
 		passosLadrao = new ArrayList<Point>();
 		passosLadrao.add(p1);
