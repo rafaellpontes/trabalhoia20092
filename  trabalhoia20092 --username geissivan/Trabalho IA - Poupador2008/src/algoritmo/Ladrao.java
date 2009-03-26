@@ -10,7 +10,7 @@ import java.util.Map;
 import br.com.unifor.ia.heuristica.HeuristicaOlfato;
 import br.com.unifor.ia.heuristica.HeuristicaVisao;
 import br.com.unifor.ia.util.Movimentacao;
-import br.com.unifor.ia.util.Registro;
+import br.com.unifor.ia.util.RegistroPoupador;
 
 import controle.Constantes;
 
@@ -26,11 +26,17 @@ public class Ladrao extends ProgramaLadrao {
 	 */
 	private Integer posicaoRastroPoupador;
 	
-	private HashMap<Integer, Registro> hashPoupador200 = new HashMap<Integer, Registro>();
-	private HashMap<Integer, Registro> hashPoupador210 = new HashMap<Integer, Registro>();
-	private HashMap<Integer, Registro> hashPoupador220 = new HashMap<Integer, Registro>();
-	private HashMap<Integer, Registro> hashPoupador230 = new HashMap<Integer, Registro>();
-		
+	/** Informacoes de ladroes ja encontrados */
+	private HashMap<Integer, RegistroPoupador> hashPoupador = new HashMap<Integer, RegistroPoupador>();
+	
+	/** Historico de movimento do ladrao */
+	private List<Object[]> historicoMovimentacao = new ArrayList<Object[]>();
+	
+	/** Posicao do banco, so sabe onde fica o banco quando entra em seu campo de visao */
+	private Integer posicaoBanco;
+	
+	/** Quantidade de moedas antes da proxima acao */
+	private Integer qtdMoedaAntAcao;
 	
 	public int acao() {
 
@@ -55,7 +61,7 @@ public class Ladrao extends ProgramaLadrao {
 		// Se encontou algum poupador no campo de visao
 		if (posicaoPoupador.size() > 0) {
 			// Carrega o mapa 5 X 5 da visao do Ladrao
-			HeuristicaVisao.carregaMapa();
+			HeuristicaVisao.carregaMapa(sensor.getPosicao());
 
 			// Carrega os possiveis passos do Ladrao
 			HeuristicaVisao.carregaPassosLadrao();
@@ -97,12 +103,15 @@ public class Ladrao extends ProgramaLadrao {
 					// Calcula a distancia manhatam
 					Integer manhattan = HeuristicaVisao.distanciaManhattan(p,
 							pPoupador);
+					
 					// Armazena numa lista para depois pegar a de menor
 					// distancia do objetivo
 					manhattanBuffer.add(manhattan);
+					
 					// Armazena no hashmap a distancia manhattan e a possivel
 					// decisao
 					caminhosMap.put(manhattan, Movimentacao.selecionarDirecaoLadraoBaseadoVisao(p));
+										
 				}
 			}
 			// Ordena por menor distancia manhattan

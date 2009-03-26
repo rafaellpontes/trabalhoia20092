@@ -14,8 +14,10 @@ public class HeuristicaVisao {
 	/*
 	 * Carregar mapa de visao do ladrao
 	 */
-	public static void carregaMapa() {
+	public static void carregaMapa(Point posicaoAtual) {
+
 		visionMap = new ArrayList<Point>();
+
 		for (int i = 0; i < 5; i++) {
 			for (int j = 0; j < 5; j++) {
 				Point p = new Point();
@@ -39,7 +41,7 @@ public class HeuristicaVisao {
 			result = true;
 		}
 		// ignora o resto
-		
+
 		return result;
 	}
 
@@ -47,11 +49,11 @@ public class HeuristicaVisao {
 	 * Carrega os possiveis movimentos do ladrao
 	 */
 	public static void carregaPassosLadrao() {
-		
-		Point p1 = new Point(2, 3); //(ESQUERDA)
-		Point p2 = new Point(3, 2); //(SUBIR)
-		Point p3 = new Point(3, 4);	//(DESCER)
-		Point p4 = new Point(4, 3); //(DIREITA)
+
+		Point p1 = new Point(2, 3); // (ESQUERDA)
+		Point p2 = new Point(3, 2); // (SUBIR)
+		Point p3 = new Point(3, 4); // (DESCER)
+		Point p4 = new Point(4, 3); // (DIREITA)
 
 		passosLadrao = new ArrayList<Point>();
 		passosLadrao.add(p1);
@@ -59,7 +61,7 @@ public class HeuristicaVisao {
 		passosLadrao.add(p3);
 		passosLadrao.add(p4);
 	}
-	
+
 	public static Point getPointFromVisionMap(Integer index) {
 		return visionMap.get(index);
 	}
@@ -71,7 +73,7 @@ public class HeuristicaVisao {
 		return new Double(Math.abs(a.getX() - b.getX())).intValue()
 				+ new Double(Math.abs(a.getY() - b.getY())).intValue();
 	}
-	
+
 	public static List<Point> getPassosLadrao() {
 		return passosLadrao;
 	}

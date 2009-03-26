@@ -2,7 +2,7 @@ package br.com.unifor.ia.util;
 
 import java.util.Date;
 
-public class Registro {
+public class RegistroPoupador {
 
 	private Integer numeroPoupador;
 	private Integer quantidadeRoubo;
