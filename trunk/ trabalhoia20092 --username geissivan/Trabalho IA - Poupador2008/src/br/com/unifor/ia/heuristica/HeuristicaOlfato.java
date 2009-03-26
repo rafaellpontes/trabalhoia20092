@@ -80,7 +80,7 @@ public class HeuristicaOlfato {
 		return visionMap;
 	}
 
-	public static Integer getIndexOfPointOnVisionMap(Point p) {
+	public static Integer getIndexOfPointOnSmellMap(Point p) {
 		return visionMap.indexOf(p);
 	}
 }

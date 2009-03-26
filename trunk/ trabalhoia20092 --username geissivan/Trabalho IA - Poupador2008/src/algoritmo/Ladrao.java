@@ -10,6 +10,7 @@ import java.util.Map;
 import br.com.unifor.ia.heuristica.HeuristicaOlfato;
 import br.com.unifor.ia.heuristica.HeuristicaVisao;
 import br.com.unifor.ia.util.Movimentacao;
+import br.com.unifor.ia.util.Registro;
 
 import controle.Constantes;
 
@@ -24,14 +25,20 @@ public class Ladrao extends ProgramaLadrao {
 	 * posicaoRastroPoupador >= 0 Rastro encontrado
 	 */
 	private Integer posicaoRastroPoupador;
-
+	
+	private HashMap<Integer, Registro> hashPoupador200 = new HashMap<Integer, Registro>();
+	private HashMap<Integer, Registro> hashPoupador210 = new HashMap<Integer, Registro>();
+	private HashMap<Integer, Registro> hashPoupador220 = new HashMap<Integer, Registro>();
+	private HashMap<Integer, Registro> hashPoupador230 = new HashMap<Integer, Registro>();
+		
+	
 	public int acao() {
 
 		// Decisao que sera tomada pelo ladrao
 		Integer decisao = 0;
 
 		// Lista para armazenar as distancias manhattan
-		List<Integer> manhttanBuffer = new ArrayList<Integer>();
+		List<Integer> manhattanBuffer = new ArrayList<Integer>();
 
 		// Map que armazena as distancias manhattan e as possiveis decisoes
 		Map<Integer, Integer> caminhosMap = new HashMap<Integer, Integer>();
@@ -92,16 +99,16 @@ public class Ladrao extends ProgramaLadrao {
 							pPoupador);
 					// Armazena numa lista para depois pegar a de menor
 					// distancia do objetivo
-					manhttanBuffer.add(manhattan);
+					manhattanBuffer.add(manhattan);
 					// Armazena no hashmap a distancia manhattan e a possivel
 					// decisao
 					caminhosMap.put(manhattan, Movimentacao.selecionarDirecaoLadraoBaseadoVisao(p));
 				}
 			}
 			// Ordena por menor distancia manhattan
-			Collections.sort(manhttanBuffer);
+			Collections.sort(manhattanBuffer);
 			// Seleciona a decisao pela menor distancia manhatam
-			decisao = caminhosMap.get(manhttanBuffer.get(0));
+			decisao = caminhosMap.get(manhattanBuffer.get(0));
 
 			// retorna a decisao
 			return decisao;
@@ -119,7 +126,7 @@ public class Ladrao extends ProgramaLadrao {
 			// decisao
 			for (Point p : list) {
 				// Recupera o index do Ponto p no Mapa de olfato do Ladrao
-				Integer indexPNoMapa = HeuristicaOlfato.getIndexOfPointOnVisionMap(p);
+				Integer indexPNoMapa = HeuristicaOlfato.getIndexOfPointOnSmellMap(p);
 				// Boolean para decidir se ele tem a possibilidade de seguir
 				boolean seguir = false;
 				// Se os pontos forem P[3,2] ou P[2,3]
@@ -152,21 +159,21 @@ public class Ladrao extends ProgramaLadrao {
 							pPoupador);
 					// Armazena numa lista para depois pegar a de menor
 					// distancia do objetivo
-					manhttanBuffer.add(manhattan);
+					manhattanBuffer.add(manhattan);
 					// Armazena no hashmap a distancia manhattan e a possivel
 					// decisao
 					caminhosMap.put(manhattan, Movimentacao.selecionarDirecaoLadraoBaseadoOlfato(p));
 				}
 			}
 			// Ordena por menor distancia manhattan
-			Collections.sort(manhttanBuffer);
+			Collections.sort(manhattanBuffer);
 			// Seleciona a decisao pela menor distancia manhatam
-			decisao = caminhosMap.get(manhttanBuffer.get(0));
+			decisao = caminhosMap.get(manhattanBuffer.get(0));
 
 			// retorna a decisao
 			return decisao;			
 			
-		} else { // Anda aleatoriamente
+		} else { // Anda sem nenhuma informacao sobre uma posicao de um poupador
 			
 			return (int) (Math.random() * 5);
 			
