@@ -28,6 +28,9 @@ public class Ladrao extends ProgramaLadrao {
 	
 	/** Posição de poupadores no campo de visão do agente ladrão */
 	private List<Integer> posicaoPoupador;
+	
+	/** Posição de ladrões no campo de visão do agente ladrão */
+	private List<Integer> posicaoLadrao;
 
 	/**
 	 * Posição do rastro de um poupador no campo de visão do agente ladrão
@@ -90,7 +93,8 @@ public class Ladrao extends ProgramaLadrao {
 		// Olfato do Ladrao
 		int[] olfato = sensor.getAmbienteOlfatoPoupador();
 
-		// Populando lista com a posicao dos poupadores
+		// Populando lista com a posicao dos poupadores e 
+		// Ladrões
 		verificarCampoVisaoLadrao(visao);
 		
 		// Atualiza a quantidade de moedas do ladrao
@@ -104,69 +108,71 @@ public class Ladrao extends ProgramaLadrao {
 			// Atualiza a informacao do ambiente
 			ambiente.inserirInformacaoPonto(sensor.getPosicao(), visao);
 			
-			// Carrega os possiveis passos do Ladrao
-			heuristicaVisao.carregaPassosLadrao();
-			List<Point> list = heuristicaVisao.getPassosLadrao();
+			// Verifica se existe algum ladrão persiguindo o poupador
+			// e se esse ladrão está mais perto que o corrente
+			Point pPoupador = heuristicaVisao.ladraoPerseguindoPoupadorMaisPertoQueLadraoCorrente(posicaoLadrao, posicaoPoupador);
+			
+			// Se não achou poupador pra perseguir decisão randomica
+			if(pPoupador == null){
+				decisao = (int) (Math.random() * 5);
+			}else{
+				// Carrega os possiveis passos do Ladrao
+				heuristicaVisao.carregaPassosLadrao();
+				List<Point> list = heuristicaVisao.getPassosLadrao();
 
-			// Percorre os possiveis passos do Ladrao, para escolher a melhor
-			// decisao
-			for (Point p : list) {
-				// Recupera o index do Ponto p no Mapa de visao do Ladrao
-				Integer indexPNoMapa = heuristicaVisao.getIndexOfPointOnVisionMap(p);
-				// Boolean para decidir se ele tem a possibilidade de seguir ou
-				// nao
-				boolean seguir = false;
-				// Se os pontos forem DIREITA ou SOB o ponto ladrao.
-				if (p.getX() + p.getY() > sensor.getPosicao().x + sensor.getPosicao().y) {
-					seguir = Movimentacao.sondarCaminho(visao[indexPNoMapa - 1]);
-				} else {
-					// Se forem os outros pontos
-					seguir = Movimentacao.sondarCaminho(visao[indexPNoMapa]);
-				}
-				
-				// Se permitir seguir
-				if (seguir) {
-					// Inicia o Calculo da Heuristica
-
-					Point pPoupador = new Point();
-
-					// Recupera a posicao do poupador
-					Integer posicao = posicaoPoupador.get(0);
-										
-					// Se for depois da posicao do Ladrao no mapa de
-					// Visao do Ladrao
-					if (posicao >= 12) {
-						pPoupador = heuristicaVisao
-								.getPointFromVisionMap(posicao + 1);
+				// Percorre os possiveis passos do Ladrao, para escolher a melhor
+				// decisao
+				for (Point p : list) {
+					// Recupera o index do Ponto p no Mapa de visao do Ladrao
+					Integer indexPNoMapa = heuristicaVisao.getIndexOfPointOnVisionMap(p);
+					// Boolean para decidir se ele tem a possibilidade de seguir ou
+					// nao
+					boolean seguir = false;
+					// Se os pontos forem DIREITA ou SOB o ponto ladrao.
+					if (p.getX() + p.getY() > sensor.getPosicao().x + sensor.getPosicao().y) {
+						seguir = Movimentacao.sondarCaminho(visao[indexPNoMapa - 1]);
 					} else {
-						pPoupador = heuristicaVisao.getPointFromVisionMap(posicao);
+						// Se forem os outros pontos
+						seguir = Movimentacao.sondarCaminho(visao[indexPNoMapa]);
 					}
 					
-					// Apos selecionar qual poupador perseguir, salva a posicao atual do poupador
-					// na variavel da ultima posicao do poupador.
-					posicaoAnteriorPoupador = pPoupador;
-					
-					// Seta o ultimo poupador perseguido na variavel do ultimo poupador perseguido
-					poupadorPerseguido = visao[posicao];
-					
-					// Calcula a distancia manhatam
-					Integer manhattan = Movimentacao.distanciaManhattan(p,
-							pPoupador);
-					
-					// Armazena numa lista para depois pegar a de menor
-					// distancia do objetivo
-					manhattanBuffer.add(manhattan);
-					
-					// Armazena no hashmap a distancia manhattan e a possivel
-					// decisao
-					caminhosMap.put(manhattan, Movimentacao.selecionarDirecaoLadraoBaseadoVisao(sensor.getPosicao(), p));
-										
+					// Se permitir seguir
+					if (seguir) {
+						// Inicia o Calculo da Heuristica
+
+						// Recupera a posicao do poupador
+						Integer posicao = heuristicaVisao.getIndexOfPointOnVisionMap(pPoupador);
+											
+						// Seta o ultimo poupador perseguido na variavel do ultimo poupador perseguido
+						if (posicao >= 12) {
+							poupadorPerseguido = visao[posicao - 1];
+						} else {
+							poupadorPerseguido = visao[posicao];
+						}
+						
+						// Apos selecionar qual poupador perseguir, salva a posicao atual do poupador
+						// na variavel da ultima posicao do poupador.
+						posicaoAnteriorPoupador = pPoupador;
+						
+						// Calcula a distancia manhatam
+						Integer manhattan = Movimentacao.distanciaManhattan(p,
+								pPoupador);
+						
+						// Armazena numa lista para depois pegar a de menor
+						// distancia do objetivo
+						manhattanBuffer.add(manhattan);
+						
+						// Armazena no hashmap a distancia manhattan e a possivel
+						// decisao
+						caminhosMap.put(manhattan, Movimentacao.selecionarDirecaoLadraoBaseadoVisao(sensor.getPosicao(), p));
+											
+					}
 				}
+				// Ordena por menor distancia manhattan
+				Collections.sort(manhattanBuffer);
+				// Seleciona a decisao pela menor distancia manhatam
+				decisao = caminhosMap.get(manhattanBuffer.get(0));	
 			}
-			// Ordena por menor distancia manhattan
-			Collections.sort(manhattanBuffer);
-			// Seleciona a decisao pela menor distancia manhatam
-			decisao = caminhosMap.get(manhattanBuffer.get(0));
 			
 		} else if ((posicaoRastroPoupador = buscarRastroPoupadorCampoOlfatoAgenteLadrao(olfato)) >= 0) { // Verifica o olfato do agente ladrão
 
@@ -247,6 +253,7 @@ public class Ladrao extends ProgramaLadrao {
 	private void verificarCampoVisaoLadrao(int[] visao) {
 		
 		posicaoPoupador = new ArrayList<Integer>();
+		posicaoLadrao = new ArrayList<Integer>();
 		
 		for (int i = 0; i < visao.length; i++) {
 			if (visao[i] == Constantes.numeroPoupador01
@@ -256,7 +263,14 @@ public class Ladrao extends ProgramaLadrao {
 				//tem um ladrao persiguindo o poupador.
 				posicaoPoupador.add(i);
 				
-			}			
+			}
+			
+			if (visao[i] == Constantes.numeroLadrao01
+					|| visao[i] == Constantes.numeroLadrao02
+					|| visao[i] == Constantes.numeroLadrao03
+					|| visao[i] == Constantes.numeroLadrao04) {
+				posicaoLadrao.add(i);
+			}
 		}
 		
 		Point posBanco;
