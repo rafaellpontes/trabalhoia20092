@@ -3,8 +3,6 @@
  */
 package aplicacao;
 
-import java.awt.Point;
-
 import br.com.unifor.ia.util.Ambiente;
 
 /**
@@ -20,7 +18,7 @@ public class Teste {
 
 		Ambiente ambiente = new Ambiente();
 		
-		for (int i = 0; i < 30; i++) {			
+		/*for (int i = 0; i < 30; i++) {			
 			for (int j = 0; j < 30; j++) {
 				Point p = new Point();
 				System.out.print("["+i+","+j+"] ");
@@ -39,7 +37,13 @@ public class Teste {
 				System.out.print("["+x+","+y+"] ");
 			}
 			System.out.println();
+		}*/
+		
+		while(true){
+			System.out.println((int) (Math.random() * 5));
 		}
+		
+		
 		
 		
 	}

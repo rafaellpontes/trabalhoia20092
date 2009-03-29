@@ -16,6 +16,9 @@ import br.com.unifor.ia.util.RegistroPoupador;
 import controle.Constantes;
 
 public class Ladrao extends ProgramaLadrao {
+	
+	/** Limita a memoria a ser utilizada para manter o historico de movimentos do ladrao */
+	private final Integer CONSTANTE_CAPACIDADE_MAX_MOV_HISTORICO = 10;
 
 	/** Heuristica de visao do ladrao */
 	HeuristicaVisao heuristicaVisao = new HeuristicaVisao();
@@ -45,15 +48,20 @@ public class Ladrao extends ProgramaLadrao {
 	/** Contador de rodadas */
 	private Integer contadorRodadas = 0;
 	
+	/** Posicao anterior do ladrao antes dessa acao */
 	private Point posicaoAnteriorLadrao;
 	
 	/** Posicao anterior a acao do poupador que esta sendo perseguido */
 	private Point posicaoAnteriorPoupador;
 	
-	/** Poupador seguido */
-	private Integer poupadorSeguido;
+	/** Poupador perseguido */
+	private Integer poupadorPerseguido;
 	
+	/** Cria um modelo do mundo e vai atualizando a cada ação */	
 	private Ambiente ambiente = new Ambiente();
+	
+	/** Lista com os ultimos movimentos realizado pelo ladrao */
+	private List<Point> historicoMovimento = new ArrayList<Point>();
 		
 	public int acao() {
 	
@@ -61,7 +69,7 @@ public class Ladrao extends ProgramaLadrao {
 		if(sensor.getNumeroDeMoedas() > qtdMoedaRodadaAnterior){
 			
 			RegistroPoupador registroPoupador = new RegistroPoupador();
-			hashPoupador.put(poupadorSeguido, registroPoupador);
+			hashPoupador.put(poupadorPerseguido, registroPoupador);
 			
 		}
 		
@@ -110,10 +118,10 @@ public class Ladrao extends ProgramaLadrao {
 				boolean seguir = false;
 				// Se os pontos forem DIREITA ou SOB o ponto ladrao.
 				if (p.getX() + p.getY() > sensor.getPosicao().x + sensor.getPosicao().y) {
-					seguir = heuristicaVisao.sondarCaminho(visao[indexPNoMapa - 1]);
+					seguir = Movimentacao.sondarCaminho(visao[indexPNoMapa - 1]);
 				} else {
 					// Se forem os outros pontos
-					seguir = heuristicaVisao.sondarCaminho(visao[indexPNoMapa]);
+					seguir = Movimentacao.sondarCaminho(visao[indexPNoMapa]);
 				}
 				
 				// Se permitir seguir
@@ -139,10 +147,10 @@ public class Ladrao extends ProgramaLadrao {
 					posicaoAnteriorPoupador = pPoupador;
 					
 					// Seta o ultimo poupador perseguido na variavel do ultimo poupador perseguido
-					poupadorSeguido = visao[posicao];
+					poupadorPerseguido = visao[posicao];
 					
 					// Calcula a distancia manhatam
-					Integer manhattan = HeuristicaVisao.distanciaManhattan(p,
+					Integer manhattan = Movimentacao.distanciaManhattan(p,
 							pPoupador);
 					
 					// Armazena numa lista para depois pegar a de menor
@@ -178,10 +186,10 @@ public class Ladrao extends ProgramaLadrao {
 				boolean seguir = false;
 				// Se os pontos forem DIREITA ou SOB o ponto ladrao.
 				if (p.getX() + p.getY() > sensor.getPosicao().x + sensor.getPosicao().y) {
-					seguir = heuristicaOlfato.sondarCaminho(visao[indexPNoMapa - 1]);
+					seguir = Movimentacao.sondarCaminho(visao[indexPNoMapa - 1]);
 				} else {
 					// Se forem os outros pontos
-					seguir = heuristicaOlfato.sondarCaminho(visao[indexPNoMapa]);
+					seguir = Movimentacao.sondarCaminho(visao[indexPNoMapa]);
 				}
 				
 				// Se permitir seguir
@@ -202,7 +210,7 @@ public class Ladrao extends ProgramaLadrao {
 						pPoupador = heuristicaOlfato.getPointFromVisionMap(posicao);
 					}
 					// Calcula a distancia manhatam
-					Integer manhattan = heuristicaOlfato.distanciaManhattan(p,
+					Integer manhattan = Movimentacao.distanciaManhattan(p,
 							pPoupador);
 					// Armazena numa lista para depois pegar a de menor
 					// distancia do objetivo
@@ -220,6 +228,8 @@ public class Ladrao extends ProgramaLadrao {
 		} else { // Anda sem nenhuma informacao sobre uma posicao de um poupador
 			
 			decisao = (int) (Math.random() * 5);
+			
+			
 			
 		}
 		

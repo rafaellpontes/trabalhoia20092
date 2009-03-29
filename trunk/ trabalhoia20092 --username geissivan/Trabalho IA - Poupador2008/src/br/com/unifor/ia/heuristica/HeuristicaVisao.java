@@ -53,31 +53,6 @@ public class HeuristicaVisao {
 		this.passosLadrao.add(p4);
 	}
 
-	/**
-	 * Calculo da distancia manhattan
-	 * */
-	public static Integer distanciaManhattan(Point a, Point b) {
-		return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-	}
-
-	/*
-	 * Verifica se o ladrao pode ir para o caminha escolhido
-	 */
-	public boolean sondarCaminho(Integer objeto) {
-		boolean result = false;
-		// verifica se estah vazio
-		if (Constantes.posicaoLivre == objeto) {
-			result = true;
-		} else if (Constantes.posicaoLivre != objeto
-				&& (Constantes.numeroPoupador01 == objeto || Constantes.numeroPoupador02 == objeto)) {
-			// verifica se nao esta vazio e se eh poupador
-			result = true;
-		}
-		// ignora o resto
-
-		return result;
-	}
-
 	public Point buscarPosicaoBanco(Point point, int[] vetorVisao){
 		Point p = new Point();
 		
