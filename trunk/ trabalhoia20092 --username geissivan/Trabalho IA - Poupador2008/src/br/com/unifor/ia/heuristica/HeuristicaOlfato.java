@@ -8,27 +8,54 @@ import controle.Constantes;
 
 public class HeuristicaOlfato {
 
-	private static List<Point> visionMap;
-	private static List<Point> passosLadrao;
+	private List<Point> passosLadrao;
+	private Point posicaoAtual;
+	private List<Point> visionMap;
 
 	/*
 	 * Carregar mapa de olfato do ladrao
 	 */
-	public static void carregaMapa() {
+	public void carregaMapa(Point posicaoAtual) {
+
 		visionMap = new ArrayList<Point>();
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 3; j++) {
-				Point p = new Point();
-				p.setLocation(i + 1, j + 1);
-				visionMap.add(p);
+		this.posicaoAtual = posicaoAtual;
+
+		/*
+		 * for (int i = 0; i < 3; i++) { for (int j = 0; j < 3; j++) { Point p =
+		 * new Point(); p.setLocation(i + 1, j + 1); visionMap.add(p); } }
+		 */
+
+		for (int y = posicaoAtual.y - 1; y <= posicaoAtual.y + 1; y++) {
+			for (int x = posicaoAtual.x - 1; x <= posicaoAtual.x + 1; x++) {
+				Point p = new Point(x, y);
+				this.visionMap.add(p);
 			}
 		}
+
+	}
+
+	/*
+	 * Carrega os possiveis movimentos do ladrao
+	 */
+	public void carregaPassosLadrao() {
+
+		Point p1 = new Point(posicaoAtual.x - 1, posicaoAtual.y); // (ESQUERDA)
+		Point p2 = new Point(posicaoAtual.x, posicaoAtual.y - 1); // (SUBIR)
+		Point p3 = new Point(posicaoAtual.x, posicaoAtual.y + 1); // (DESCER)
+		Point p4 = new Point(posicaoAtual.x + 1, posicaoAtual.y); // (DIREITA)
+
+		this.passosLadrao = new ArrayList<Point>();
+		this.passosLadrao.add(p1);
+		this.passosLadrao.add(p2);
+		this.passosLadrao.add(p3);
+		this.passosLadrao.add(p4);
+
 	}
 
 	/*
 	 * Verifica se o ladrao pode ir para o caminha escolhido
 	 */
-	public static boolean sondarCaminho(Integer objeto) {
+	public boolean sondarCaminho(Integer objeto) {
 		boolean result = false;
 		// verifica se estah vazio
 		if (Constantes.posicaoLivre == objeto) {
@@ -39,48 +66,31 @@ public class HeuristicaOlfato {
 			result = true;
 		}
 		// ignora o resto
-		
+
 		return result;
-	}
-
-	/*
-	 * Carrega os possiveis movimentos do ladrao
-	 */
-	public static void carregaPassosLadrao() {
-		
-		Point p1 = new Point(2, 1); //(ESQUERDA)
-		Point p2 = new Point(1, 2); //(SUBIR)
-		Point p3 = new Point(3, 2);	//(DESCER)
-		Point p4 = new Point(2, 3); //(DIREITA)
-
-		passosLadrao = new ArrayList<Point>();
-		passosLadrao.add(p1);
-		passosLadrao.add(p2);
-		passosLadrao.add(p3);
-		passosLadrao.add(p4);
-	}
-	
-	public static Point getPointFromVisionMap(Integer index) {
-		return visionMap.get(index);
 	}
 
 	/**
 	 * Calculo da distancia manhattan
 	 * */
-	public static Integer distanciaManhattan(Point a, Point b) {
-		return new Double(Math.abs(a.getX() - b.getX())).intValue()
-				+ new Double(Math.abs(a.getY() - b.getY())).intValue();
+	public Integer distanciaManhattan(Point a, Point b) {
+		return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 	}
-	
-	public static List<Point> getPassosLadrao() {
+
+	public Integer getIndexOfPointOnSmellMap(Point p) {
+		return visionMap.indexOf(p);
+	}
+
+	public List<Point> getPassosLadrao() {
 		return passosLadrao;
 	}
 
-	public static List<Point> getVisionMap() {
+	public Point getPointFromVisionMap(Integer index) {
+		return this.visionMap.get(index);
+	}
+
+	public List<Point> getVisionMap() {
 		return visionMap;
 	}
 
-	public static Integer getIndexOfPointOnSmellMap(Point p) {
-		return visionMap.indexOf(p);
-	}
 }
