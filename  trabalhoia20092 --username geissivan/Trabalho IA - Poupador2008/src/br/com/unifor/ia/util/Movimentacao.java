@@ -37,19 +37,19 @@ public class Movimentacao {
 	/*
 	 * Define a direcao que o ladrao ira tomar com base no olfato do ladrao
 	 */
-	public static Integer selecionarDirecaoLadraoBaseadoOlfato(Point p) {
+	public static Integer selecionarDirecaoLadraoBaseadoOlfato(Point posicaoLadrao, Point p) {
 		Integer mov = 0;
 
-		if (p.getX() == 1 && p.getY() == 2) {
+		if (p.x == posicaoLadrao.x && p.y == posicaoLadrao.y-1) {
 			// Cima
 			mov = 1;
-		} else if (p.getX() == 3 && p.getY() == 2) {
+		} else if (p.x == posicaoLadrao.x && p.y == posicaoLadrao.y+1) {
 			// Baixo
 			mov = 2;
-		} else if (p.getX() == 2 && p.getY() == 3) {
+		} else if (p.x == posicaoLadrao.x+1 && p.y == posicaoLadrao.y) {
 			// Direita
 			mov = 3;
-		} else if (p.getX() == 2 && p.getY() == 1) {
+		} else if (p.x == posicaoLadrao.x-1 && p.y == posicaoLadrao.y) {
 			// Esquerda
 			mov = 4;
 		}
