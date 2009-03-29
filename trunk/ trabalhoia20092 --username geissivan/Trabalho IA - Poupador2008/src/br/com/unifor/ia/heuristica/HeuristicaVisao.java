@@ -2,7 +2,12 @@ package br.com.unifor.ia.heuristica;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import br.com.unifor.ia.util.Movimentacao;
 
 import controle.Constantes;
 
@@ -20,13 +25,10 @@ public class HeuristicaVisao {
 		this.visionMap = new ArrayList<Point>();
 		this.posicaoAtual = posicaoAtual;
 
-		/* for (int i = 0; i < 5; i++) { 
-		 * 	for (int j = 0; j < 5; j++) { 
-		 * 		Point p = new Point(); 
-		 *      p.setLocation(i + 1, j + 1); 
-		 *      this.visionMap.add(p); 
-		 *  } 
-		 * } */
+		/*
+		 * for (int i = 0; i < 5; i++) { for (int j = 0; j < 5; j++) { Point p =
+		 * new Point(); p.setLocation(i + 1, j + 1); this.visionMap.add(p); } }
+		 */
 
 		for (int y = posicaoAtual.y - 2; y <= posicaoAtual.y + 2; y++) {
 			for (int x = posicaoAtual.x - 2; x <= posicaoAtual.x + 2; x++) {
@@ -55,40 +57,113 @@ public class HeuristicaVisao {
 
 	public Point buscarPosicaoBanco(Point point, int[] vetorVisao){
 		Point p = new Point();
-		
+
 		int xMax = point.x + 2;
 		int xMin = point.x - 2;
-		int yMin = point.y - 2;		
-		
+		int yMin = point.y - 2;
+
 		int x = xMin;
-		int y = yMin;		
-		
-		for(int i = 0; i < 25; i++){
-			
-			if(i == 12){
-				
-			}if(i > 12){
-				if(vetorVisao[i-1] == Constantes.numeroBanco){
+		int y = yMin;
+
+		for (int i = 0; i < 25; i++) {
+
+			if (i == 12) {
+
+			}
+			if (i > 12) {
+				if (vetorVisao[i - 1] == Constantes.numeroBanco) {
 					p.setLocation(x, y);
 					return p;
 				}
-			}else {
-				if(vetorVisao[i] == Constantes.numeroBanco){
+			} else {
+				if (vetorVisao[i] == Constantes.numeroBanco) {
 					p.setLocation(x, y);
 					return p;
 				}
 			}
-			if(x < xMax){
+			if (x < xMax) {
 				x++;
-			}else if (x == xMax){
+			} else if (x == xMax) {
 				x = xMin;
 				y++;
-			}			
+			}
 		}
-		
+
 		return null;
 	}
-	
+
+	/**
+	 * Método que retorna o poupador mais perto do ladrão corrente.. ou seja, o
+	 * poupador que deverá ser seguido
+	 * 
+	 * @param posicaoLadrao
+	 * @param posicaoPoupador
+	 * @return
+	 */
+	public Point ladraoPerseguindoPoupadorMaisPertoQueLadraoCorrente(
+			List<Integer> posicaoLadrao, List<Integer> posicaoPoupador) {
+
+		// Lista para armazenar as distâncias manhattan do ladrão corrente para
+		// cada poupador e o ponto do poupador
+		Map<Integer, Point> posicaoLadraoCorrentePoupadorManhattanList = new HashMap<Integer, Point>();
+		List<Integer> chavePosicaoLadraoCorrentePoupadorManhattanList = new ArrayList<Integer>();
+
+		// Calcula a distancia do ladrão corrente para cada poupador
+		for (Integer p : posicaoPoupador) {
+			// Recupera o ponto do poupador
+			Point pPoupador = new Point();
+			if (p >= 12) {
+				pPoupador = getPointFromVisionMap(p + 1);
+			} else {
+				pPoupador = getPointFromVisionMap(p);
+			}
+
+			// Calcula a distancia manhatam do poupador para o ladrão
+			Integer manhattan = Movimentacao.distanciaManhattan(posicaoAtual, pPoupador);
+
+			// Adiciona na lista de distâncias
+			posicaoLadraoCorrentePoupadorManhattanList
+					.put(manhattan, pPoupador);
+			chavePosicaoLadraoCorrentePoupadorManhattanList.add(manhattan);
+
+		}
+
+		// Ordena a lista pela menor distância
+		Collections.sort(chavePosicaoLadraoCorrentePoupadorManhattanList);
+
+		for (Integer pCorrente : chavePosicaoLadraoCorrentePoupadorManhattanList) {
+			boolean persegueAlgumPoupador = true;
+			Point pPoupador = posicaoLadraoCorrentePoupadorManhattanList
+					.get(pCorrente);
+			for (Integer pLadraoInteger : posicaoLadrao) {
+				// Recupera o ponto do ladrão
+				Point pLadrao = new Point();
+				if (pLadraoInteger >= 12) {
+					pLadrao = getPointFromVisionMap(pLadraoInteger + 1);
+				} else {
+					pLadrao = getPointFromVisionMap(pLadraoInteger);
+				}
+
+				// Calcula a distancia manhatam do poupador para o ladrão
+				Integer manhattan = Movimentacao.distanciaManhattan(pLadrao, pPoupador);
+
+				if (pCorrente > manhattan) {
+					persegueAlgumPoupador = false;
+					// Ladrão corrente está a uma distancia maior do que outro
+					// ladrão
+					break;
+				}
+			}
+
+			if (persegueAlgumPoupador) {
+				return pPoupador;
+			}
+		}
+
+		return null;
+
+	}
+
 	public Integer getIndexOfPointOnVisionMap(Point p) {
 		return visionMap.indexOf(p);
 	}
