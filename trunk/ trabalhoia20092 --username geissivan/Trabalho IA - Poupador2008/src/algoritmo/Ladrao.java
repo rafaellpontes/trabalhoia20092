@@ -22,6 +22,9 @@ public class Ladrao extends ProgramaLadrao {
 	
 	/** Limita a quantidade de tentativas de assalto a determinado poupador em um número de rodadas */
 	private final Integer CONSTANTE_QUANTIDADE_MIN_PARA_REASSALTO = 5;
+	
+	/** Limita a quantidade de tentativas frustradas de assalto */
+	private final Integer CONSTANTE_QUANTIDADE_MAX_DE_TENTATIVAS_FRUSTRADAS = 5;
 
 	/** Tentativas de assalto sem sucesso, ou seja, poupador tava liso no momento do sinistro */
 	private Integer tentativasFrustradas = 0;
@@ -125,6 +128,10 @@ public class Ladrao extends ProgramaLadrao {
 			if(pPoupador == null){
 				decisao = (int) (Math.random() * 5);
 			}else{
+				
+				// Verifica contador de tentativas frustradas
+				ladraoTentativasFrustradas(pPoupador, sensor.getPosicao());
+				
 				// Carrega os possiveis passos do Ladrao
 				heuristicaVisao.carregaPassosLadrao();
 				List<Point> list = heuristicaVisao.getPassosLadrao();
@@ -359,6 +366,8 @@ public class Ladrao extends ProgramaLadrao {
 					if(contadorRodadas - hashPoupador.get(visao[i]).getRodadaAssalto() > CONSTANTE_QUANTIDADE_MIN_PARA_REASSALTO){
 						posicaoPoupador.add(i);
 					}
+				}else if(tentativasFrustradas > CONSTANTE_QUANTIDADE_MAX_DE_TENTATIVAS_FRUSTRADAS){
+					//Tira o poupador do campo de visão do ladrão
 				}else{
 					posicaoPoupador.add(i);
 				}
@@ -409,4 +418,26 @@ public class Ladrao extends ProgramaLadrao {
 
 	}
 	
+	/**
+	 * Incrementa as tentativas frustradas do ladrão
+	 * @param pPoupador
+	 * @param pLadrao
+	 */
+	private void ladraoTentativasFrustradas(Point pPoupador, Point pLadrao){
+		// Está abaixo do poupador
+		if(pLadrao.y - pPoupador.y == 1 && pLadrao.x - pPoupador.x == 0){
+			tentativasFrustradas++;
+		}else if(pPoupador.y - pLadrao.y == 1 && pPoupador.x - pLadrao.x == 0){
+			// Está acima do poupador
+			tentativasFrustradas++;
+		}else if(pPoupador.x - pLadrao.x == 1 && pPoupador.y - pLadrao.y == 0){
+			// Está a esquerda do poupador 
+			tentativasFrustradas++;
+		}else if(pLadrao.x - pPoupador.x == 1 && pLadrao.y - pPoupador.y == 0){
+			// Está a direita do poupador
+			tentativasFrustradas++; 
+		}else{
+			tentativasFrustradas = 0;
+		}
+	}
 }
