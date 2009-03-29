@@ -209,7 +209,7 @@ public class Ladrao extends ProgramaLadrao {
 					manhattanBuffer.add(manhattan);
 					// Armazena no hashmap a distancia manhattan e a possivel
 					// decisao
-					caminhosMap.put(manhattan, Movimentacao.selecionarDirecaoLadraoBaseadoOlfato(p));
+					caminhosMap.put(manhattan, Movimentacao.selecionarDirecaoLadraoBaseadoOlfato(sensor.getPosicao(), p));
 				}
 			}
 			// Ordena por menor distancia manhattan
