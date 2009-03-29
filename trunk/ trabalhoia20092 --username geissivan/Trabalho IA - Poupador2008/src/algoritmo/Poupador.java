@@ -134,10 +134,10 @@ public class Poupador extends ProgramaPoupador {
         if (ladraoProximo) {
             if (pastilhaProxima) {
                 // Se o ladrão estiver por perto pega.
-                System.out.println("Ir para a pastilha!");
+                //System.out.println("Ir para a pastilha!");
                 return irParaObjeto(Poupador.PASTILHA);
             } else {
-                System.out.println("Rebater ladrão!");
+                //System.out.println("Rebater ladrão!");
                 return andar(analisaSaidas(gerarSaidas()));
             }     
         }
@@ -145,11 +145,11 @@ public class Poupador extends ProgramaPoupador {
         if (paredeAoRedor) {
             // Se pastilha perto de parede não pega.
             if (detectarAoRedor(Poupador.PASTILHA) && !ladraoProximo) {
-                System.out.println("Desviar de pastilha!");
+                //System.out.println("Desviar de pastilha!");
                 return desviar(detectarAoRedorPos(Poupador.PASTILHA));
             // Desviar da parede.
             } else {
-                System.out.println("Desviar parede!");
+                //System.out.println("Desviar parede!");
                 return desviar(detectarAoRedorPos(Poupador.PAREDE));
             }
 
@@ -158,12 +158,12 @@ public class Poupador extends ProgramaPoupador {
         if (pastilhaProxima) {
             // Se o ladrão estiver por perto pega.
             if (ladraoProximo) {
-                System.out.println("Ir para a pastilha!");
+                //System.out.println("Ir para a pastilha!");
                 return irParaObjeto(Poupador.PASTILHA);
             } // Se não desviar da pastilha
             else {
                 if (detectarAoRedor(Poupador.PASTILHA)) {
-                    System.out.println("Desviar de pastilha!");
+                    //System.out.println("Desviar de pastilha!");
                     return desviar(detectarAoRedorPos(Poupador.PASTILHA));
                 }
             }
@@ -171,7 +171,7 @@ public class Poupador extends ProgramaPoupador {
        
         // Ladrão perto pela visão
         if (ladraoProximoOlfato) {
-            System.out.println("Rebater ladrão pelo olfato!");
+           // System.out.println("Rebater ladrão pelo olfato!");
             return andar(rebater(checaPresencaObjetoOlfato(Poupador.LADRAO)));
         }
 
@@ -179,12 +179,12 @@ public class Poupador extends ProgramaPoupador {
         if (bancoProximo) {
             // Se a quantidade de moedas acumuladas for maior que a constante definida, deixar dinheiro no banco.
             if (sensor.getNumeroDeMoedas() >= Poupador.QUANT_MOEDAS_ACUMULADAS) {
-                System.out.println("Ir deixar dinheiro no banco!");
+                //System.out.println("Ir deixar dinheiro no banco!");
                 return irParaObjeto(Poupador.BANCO);
             } // Se não desviar do banco.
             else {
                 if (detectarAoRedor(Poupador.BANCO)) {
-                    System.out.println("Não deixa dinheiro no banco!");
+                    //System.out.println("Não deixa dinheiro no banco!");
                     return desviar(detectarAoRedorPos(Poupador.BANCO));
                 }
 
@@ -192,11 +192,11 @@ public class Poupador extends ProgramaPoupador {
         }
         // Moeda Próximo.
         if (moedaProxima) {
-            System.out.println("Ir para moeda!");
+            //System.out.println("Ir para moeda!");
             return irParaObjeto(Poupador.MOEDA);
         }
 
-        System.out.println("Randômico!");
+        //System.out.println("Randômico!");
         return randomicoRacional();
     }
 
@@ -684,7 +684,7 @@ public class Poupador extends ProgramaPoupador {
             Random r = new Random();
             int temp = r.nextInt(saidas.get(0).size());
             retorno = saidas.get(0).get(temp);
-            System.out.println("desviei do lado para " + retorno);
+            //System.out.println("desviei do lado para " + retorno);
 
         } else {
 
@@ -698,13 +698,13 @@ public class Poupador extends ProgramaPoupador {
                 }
             }
             if (ret.size() == 0) {
-                System.out.println("hitek, não sei o q fazer.... :S");
+                //System.out.println("hitek, não sei o q fazer.... :S");
                 retorno = 1;
             } else {
                 Random r = new Random();
                 int temp = r.nextInt(ret.size());
                 retorno = ret.get(temp);
-                System.out.println("desviei do lado para " + retorno);
+                //System.out.println("desviei do lado para " + retorno);
 
             }
         }
