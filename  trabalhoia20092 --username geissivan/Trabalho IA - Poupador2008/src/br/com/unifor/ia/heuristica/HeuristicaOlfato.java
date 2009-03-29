@@ -52,31 +52,6 @@ public class HeuristicaOlfato {
 
 	}
 
-	/*
-	 * Verifica se o ladrao pode ir para o caminha escolhido
-	 */
-	public boolean sondarCaminho(Integer objeto) {
-		boolean result = false;
-		// verifica se estah vazio
-		if (Constantes.posicaoLivre == objeto) {
-			result = true;
-		} else if (Constantes.posicaoLivre != objeto
-				&& (Constantes.numeroPoupador01 == objeto || Constantes.numeroPoupador02 == objeto)) {
-			// verifica se nao esta vazio e se eh poupador
-			result = true;
-		}
-		// ignora o resto
-
-		return result;
-	}
-
-	/**
-	 * Calculo da distancia manhattan
-	 * */
-	public Integer distanciaManhattan(Point a, Point b) {
-		return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-	}
-
 	public Integer getIndexOfPointOnSmellMap(Point p) {
 		return visionMap.indexOf(p);
 	}
