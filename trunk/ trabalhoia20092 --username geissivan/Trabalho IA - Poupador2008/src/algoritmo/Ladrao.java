@@ -89,6 +89,7 @@ public class Ladrao extends ProgramaLadrao {
 		}
 		
 		contadorRodadas++;
+		System.out.println(contadorRodadas);
 
 		// Decisao que sera tomada pelo ladrao
 		Integer decisao = 0;
@@ -126,7 +127,9 @@ public class Ladrao extends ProgramaLadrao {
 			
 			// Se não achou poupador pra perseguir decisão randomica
 			if(pPoupador == null){
-				decisao = (int) (Math.random() * 5);
+				
+				decisao = buscarDecisaoMovimentoSemVisaoOlfatoPoupador(visao);
+				
 			}else{
 				
 				// Verifica contador de tentativas frustradas
@@ -249,90 +252,7 @@ public class Ladrao extends ProgramaLadrao {
 
 		} else { // Anda sem nenhuma informacao sobre uma posicao de um poupador
 			
-			//decisao = (int) (Math.random() * 5);
-			
-			List<Point> possiveisMovimentos = Movimentacao.carregaPassosLadrao(sensor.getPosicao());
-			
-			List<Point> movimentosAprovados = new ArrayList<Point>();
-			
-			for (Point point : possiveisMovimentos) {
-			
-				if(!historicoMovimento.contains(point) && !point.equals(posicaoAnteriorLadrao)){
-										
-					boolean seguir = false;
-					// Se os pontos forem DIREITA ou SOB o ponto ladrao.
-					if (point.x + point.y > sensor.getPosicao().x + sensor.getPosicao().y) {
-						
-						//Se for direita
-						if(point.x > sensor.getPosicao().x){
-							seguir = Movimentacao.sondarCaminho(visao[12]);
-						}else{ //baixo
-							seguir = Movimentacao.sondarCaminho(visao[16]);
-						}
-												
-					} else {
-						//Se for esquerda
-						if(point.x < sensor.getPosicao().x){
-							seguir = Movimentacao.sondarCaminho(visao[11]);
-						}else{ //cima
-							seguir = Movimentacao.sondarCaminho(visao[7]);
-						}
-					}					
-					
-					if(seguir){
-						movimentosAprovados.add(point);
-					}					
-				}
-				
-			}
-			
-			// Se existir algum movimento não repetido, segue ele
-			if(!movimentosAprovados.isEmpty()){
-			
-				Collections.shuffle(movimentosAprovados);
-				decisao = Movimentacao.selecionarDirecaoLadraoBaseadoVisao(sensor.getPosicao(), movimentosAprovados.get(0));
-			
-			}else{ // Se não, roda aleatorio um algum movimento
-				
-				Integer count = 0;
-				
-				Collections.shuffle(possiveisMovimentos);
-				
-				while (decisao == 0 && count < 4) {
-					Point point = possiveisMovimentos.get(count);
-					count++;
-					boolean seguir = false;
-					
-					if (point.x + point.x > sensor.getPosicao().x
-							+ sensor.getPosicao().y) {
-
-						// Se for direita
-						if (point.x > sensor.getPosicao().x) {
-							seguir = Movimentacao.sondarCaminho(visao[13]);
-						} else { // baixo
-							seguir = Movimentacao.sondarCaminho(visao[17]);
-						}
-
-					} else {
-						// Se for esquerda
-						if (point.x < sensor.getPosicao().x) {
-							seguir = Movimentacao.sondarCaminho(visao[11]);
-						} else { // cima
-							seguir = Movimentacao.sondarCaminho(visao[7]);
-						}
-					}
-
-					// Vai por um ponto que ja tinha no historico
-					if (seguir && !point.equals(posicaoAnteriorLadrao)) {
-						decisao = Movimentacao.selecionarDirecaoLadraoBaseadoVisao(sensor.getPosicao(), point);
-					}
-				}
-				
-				// Se não tiver nenhuma outra opção que nao seja voltar por onde ele veio, ele regressa.
-				if(decisao == 0){
-					decisao = Movimentacao.selecionarDirecaoLadraoBaseadoVisao(sensor.getPosicao(), posicaoAnteriorLadrao);
-				}				
-			}
+			decisao = buscarDecisaoMovimentoSemVisaoOlfatoPoupador(visao);
 			
 		}
 		
@@ -418,6 +338,96 @@ public class Ladrao extends ProgramaLadrao {
 
 	}
 	
+	private Integer buscarDecisaoMovimentoSemVisaoOlfatoPoupador(int[] visao){
+		
+		Integer decisao = 0;
+		
+		List<Point> possiveisMovimentos = Movimentacao.carregaPassosLadrao(sensor.getPosicao());
+		
+		List<Point> movimentosAprovados = new ArrayList<Point>();
+		
+		for (Point point : possiveisMovimentos) {
+		
+			if(!historicoMovimento.contains(point) && !point.equals(posicaoAnteriorLadrao)){
+									
+				boolean seguir = false;
+				// Se os pontos forem DIREITA ou SOB o ponto ladrao.
+				if (point.x + point.y > sensor.getPosicao().x + sensor.getPosicao().y) {
+					
+					//Se for direita
+					if(point.x > sensor.getPosicao().x){
+						seguir = Movimentacao.sondarCaminho(visao[12]);
+					}else{ //baixo
+						seguir = Movimentacao.sondarCaminho(visao[16]);
+					}
+											
+				} else {
+					//Se for esquerda
+					if(point.x < sensor.getPosicao().x){
+						seguir = Movimentacao.sondarCaminho(visao[11]);
+					}else{ //cima
+						seguir = Movimentacao.sondarCaminho(visao[7]);
+					}
+				}					
+				
+				if(seguir){
+					movimentosAprovados.add(point);
+				}					
+			}
+			
+		}
+		
+		// Se existir algum movimento não repetido, segue ele
+		if(!movimentosAprovados.isEmpty()){
+		
+			Collections.shuffle(movimentosAprovados);
+			decisao = Movimentacao.selecionarDirecaoLadraoBaseadoVisao(sensor.getPosicao(), movimentosAprovados.get(0));
+		
+		}else{ // Se não, roda aleatorio um algum movimento
+			
+			Integer count = 0;
+			
+			Collections.shuffle(possiveisMovimentos);
+			
+			while (decisao == 0 && count < 4) {
+				Point point = possiveisMovimentos.get(count);
+				count++;
+				boolean seguir = false;
+				
+				if (point.x + point.x > sensor.getPosicao().x
+						+ sensor.getPosicao().y) {
+
+					// Se for direita
+					if (point.x > sensor.getPosicao().x) {
+						seguir = Movimentacao.sondarCaminho(visao[13]);
+					} else { // baixo
+						seguir = Movimentacao.sondarCaminho(visao[17]);
+					}
+
+				} else {
+					// Se for esquerda
+					if (point.x < sensor.getPosicao().x) {
+						seguir = Movimentacao.sondarCaminho(visao[11]);
+					} else { // cima
+						seguir = Movimentacao.sondarCaminho(visao[7]);
+					}
+				}
+
+				// Vai por um ponto que ja tinha no historico
+				if (seguir && !point.equals(posicaoAnteriorLadrao)) {
+					decisao = Movimentacao.selecionarDirecaoLadraoBaseadoVisao(sensor.getPosicao(), point);
+				}
+			}
+			
+			// Se não tiver nenhuma outra opção que nao seja voltar por onde ele veio, ele regressa.
+			if(decisao == 0){
+				decisao = Movimentacao.selecionarDirecaoLadraoBaseadoVisao(sensor.getPosicao(), posicaoAnteriorLadrao);
+			}				
+		}
+		
+		return decisao;		
+	}
+
 	/**
 	 * Incrementa as tentativas frustradas do ladrão
 	 * @param pPoupador
@@ -439,5 +449,5 @@ public class Ladrao extends ProgramaLadrao {
 		}else{
 			tentativasFrustradas = 0;
 		}
-	}
+	}	
 }
