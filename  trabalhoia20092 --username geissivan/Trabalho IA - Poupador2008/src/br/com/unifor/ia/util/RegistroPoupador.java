@@ -1,12 +1,10 @@
 package br.com.unifor.ia.util;
 
-import java.util.Date;
-
 public class RegistroPoupador {
 
 	private Integer numeroPoupador;
 	private Integer quantidadeRoubo;
-	private Date ultimoAssalto;
+	private Integer rodadaAssalto;
 	
 	public Integer getNumeroPoupador() {
 		return numeroPoupador;
@@ -20,13 +18,11 @@ public class RegistroPoupador {
 	public void setQuantidadeRoubo(Integer quantidadeRoubo) {
 		this.quantidadeRoubo = quantidadeRoubo;
 	}
-	public Date getUltimoAssalto() {
-		return ultimoAssalto;
+	public Integer getRodadas() {
+		return rodadaAssalto;
 	}
-	public void setUltimoAssalto(Date ultimoAssalto) {
-		this.ultimoAssalto = ultimoAssalto;
+	public void setRodadas(Integer rodadas) {
+		this.rodadaAssalto = rodadas;
 	}
-	
-	
-	
+		
 }
