@@ -19,7 +19,13 @@ public class Ladrao extends ProgramaLadrao {
 	
 	/** Limita a memoria a ser utilizada para manter o historico de movimentos do ladrao */
 	private final Integer CONSTANTE_CAPACIDADE_MAX_MOV_HISTORICO = 10;
+	
+	/** Limita a quantidade de tentativas de assalto a determinado poupador em um número de rodadas */
+	private final Integer CONSTANTE_QUANTIDADE_MIN_PARA_REASSALTO = 5;
 
+	/** Tentativas de assalto sem sucesso, ou seja, poupador tava liso no momento do sinistro */
+	private Integer tentativasFrustradas = 0;
+	
 	/** Heuristica de visao do ladrao */
 	HeuristicaVisao heuristicaVisao = new HeuristicaVisao();
 	
@@ -72,6 +78,9 @@ public class Ladrao extends ProgramaLadrao {
 		if(sensor.getNumeroDeMoedas() > qtdMoedaRodadaAnterior){
 			
 			RegistroPoupador registroPoupador = new RegistroPoupador();
+			registroPoupador.setNumeroPoupador(poupadorPerseguido);
+			registroPoupador.setQuantidadeRoubo(sensor.getNumeroDeMoedas() - qtdMoedaRodadaAnterior);
+			registroPoupador.setRodadaAssalto(contadorRodadas);
 			hashPoupador.put(poupadorPerseguido, registroPoupador);
 			
 		}
@@ -346,9 +355,13 @@ public class Ladrao extends ProgramaLadrao {
 			if (visao[i] == Constantes.numeroPoupador01
 					|| visao[i] == Constantes.numeroPoupador02) {
 				
-				//Validar situacoes onde o poupador nao tem moedas e quando ja
-				//tem um ladrao persiguindo o poupador.
-				posicaoPoupador.add(i);
+				if(hashPoupador.get(visao[i]) != null){
+					if(contadorRodadas - hashPoupador.get(visao[i]).getRodadaAssalto() > CONSTANTE_QUANTIDADE_MIN_PARA_REASSALTO){
+						posicaoPoupador.add(i);
+					}
+				}else{
+					posicaoPoupador.add(i);
+				}
 				
 			}
 			
