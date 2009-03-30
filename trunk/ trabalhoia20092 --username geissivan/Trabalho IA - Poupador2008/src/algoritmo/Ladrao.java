@@ -284,10 +284,10 @@ public class Ladrao extends ProgramaLadrao {
 				
 				if(hashPoupador.get(visao[i]) != null){
 					if(contadorRodadas - hashPoupador.get(visao[i]).getRodadaAssalto() > CONSTANTE_QUANTIDADE_MIN_PARA_REASSALTO){
-						posicaoPoupador.add(i);
+						if(tentativasFrustradas < CONSTANTE_QUANTIDADE_MAX_DE_TENTATIVAS_FRUSTRADAS){
+							posicaoPoupador.add(i);	
+						}
 					}
-				}else if(tentativasFrustradas > CONSTANTE_QUANTIDADE_MAX_DE_TENTATIVAS_FRUSTRADAS){
-					//Tira o poupador do campo de visão do ladrão
 				}else{
 					posicaoPoupador.add(i);
 				}
