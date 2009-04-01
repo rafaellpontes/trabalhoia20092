@@ -1,761 +1,358 @@
 package algoritmo;
 
+import controle.Constantes;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Vector;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Poupador extends ProgramaPoupador {
 
-    private int[] cima = new int[]{2, 7};
-    private int[] baixo = new int[]{16, 21};
-    private int[] esquerda = new int[]{0, 1, 5, 6, 10, 11, 14, 15, 19, 20};
-    private int[] direita = new int[]{3, 4, 8, 9, 12, 13, 17, 18, 22, 23};
-    // Constantes
-    public static final int SEM_VISAO = -2;
-    public static final int FORA_AMBIENTE = -1;
-    public static final int CELULA_VAZIA = 0;
-    public static final int PAREDE = 1;
-    public static final int BANCO = 3;
-    public static final int MOEDA = 4;
-    public static final int PASTILHA = 5;
-    public static final int POUPADOR = 100;
-    public static final int LADRAO = 200;
-    public static final int OBJETO_FORA_DE_VISAO = -1;
-    public static final int QUANT_MOEDAS_ACUMULADAS = 5;
-    // Sondagem do ambiente.
-    // Visão
-    private boolean paredeAoRedor;
-    private boolean bancoProximo;
-    private boolean bancoAoRedor;
-    private boolean moedaProxima;
-    private boolean pastilhaProxima;
-    private boolean pastilhaAoRedor;
-    private boolean poupadorProximo;
-    private boolean ladraoProximo;
-    // Olfato
-    private boolean ladraoProximoOlfato;
-    private boolean poupadorProximoOlfato;
-    public static final int NADA_SENTIDO_PELO_OLFATO = -1;
-    // Unid de olfato
-    public static final int SEM_MARCA = 0;
-    public static final int UMA_UNID_ATRAS = 1;
-    public static final int DUAS_UNID_ATRAS = 2;
-    public static final int TREIS_UNID_ATRAS = 3;
-    public static final int QUAT_UNID_ATRAS = 4;
-    public static final int CINC_UNID_ATRAS = 5;
-    private int dirAnt;
+    public static final int CIMA = 7;
+    public static final int BAIXO = 16;
+    public static final int ESQUERDA = 11;
+    public static final int DIREITA = 12;
+    public static final int POSICAO_ATUAL = 99;
+    public static final int[] COORDENADA_CIMA = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    public static final int[] COORDENADA_BAIXO = {14, 15, 16, 17, 18, 19, 20, 21, 22, 23};
+    public static final int[] COORDENADA_ESQUERDA = {0, 1, 5, 6, 10, 11, 14, 15, 19, 20};
+    public static final int[] COORDENADA_DIREITA = {3, 4, 8, 9, 12, 13, 17, 18, 22, 23};
+    public static final int POS_SEM_VISAO = -2;
+    public static final int POS_FORA_AMBIENTE = -1;
+    public static final int POS_CELULA_VAZIA = 0;
+    public static final int POS_PAREDE = 1;
+    public static final int POS_BANCO = 3;
+    public static final int POS_MOEDA = 4;
+    public static final int POS_PASTILHA = 5;
+    public static final int POS_POUPADOR = 100;
+    public static final int POS_LADRAO = 200;
+    public static final int MOEDAS_PARA_BANCO = 30;
 
+    @Override
     public int acao() {
-        sondarComVisao();
-        sondarComOlfato();
-        return decisao();
+        // 1: Determinar objetivo
+        // 2: Sortear direcao
+        // 3: Calcular custo + dist�ncia
+        // 4: Escolher direcao
+        int direcao = 0;
+
+        //if (sensor.getPosicao().getX() == 29 && sensor.getPosicao().getY() == 8) return 0;
+        determinarObjetivo();
+        direcao = sortearDirecao();
+        if (objetivo.equals("FUGIR")) {
+            System.out.println("probabilidade=" + probabilidadeRoubo());
+        }
+
+        return direcao;
     }
 
-    /**
-     * Sonda o ambiente visual e seta variáveis booleanas.
-     */
-    private void sondarComVisao() {
-        // Sonda parede ao redor.
-        if (detectarAoRedor(Poupador.PAREDE)) {
-            paredeAoRedor = true;
-        } else {
-            paredeAoRedor = false;
-        }
-        // Sonda banco próximo.
-        if (retornaPosObjetoMaisProximo(Poupador.BANCO) != OBJETO_FORA_DE_VISAO) {
-
-            if (detectarAoRedor(Poupador.BANCO)) {
-                bancoAoRedor = true;
-            } else {
-                bancoAoRedor = false;
-            }
-            bancoProximo = true;
-        } else {
-            bancoProximo = false;
-        }
-
-        // Sonda pastilha próximo.
-        if (retornaPosObjetoMaisProximo(Poupador.PASTILHA) != OBJETO_FORA_DE_VISAO) {
-            if (detectarAoRedor(Poupador.PASTILHA)) {
-                pastilhaAoRedor = true;
-            } else {
-                pastilhaAoRedor = false;
-            }
-            pastilhaProxima = true;
-        } else {
-            pastilhaProxima = false;
-        }
-        // Sonda moeda ao redor.
-        if (retornaPosObjetoMaisProximo(Poupador.MOEDA) != OBJETO_FORA_DE_VISAO) {
-            moedaProxima = true;
-        } else {
-            moedaProxima = false;
-        }
-        // Sonda poupador próximo.
-        if (retornaPosObjetoMaisProximo(Poupador.POUPADOR) != OBJETO_FORA_DE_VISAO) {
-            poupadorProximo = true;
-        } else {
-            poupadorProximo = false;
-        }
-        // Sonda ladrão próximo.
-        if (retornaPosLadraooMaisProximo() != OBJETO_FORA_DE_VISAO) {
-            ladraoProximo = true;
-        } else {
-            ladraoProximo = false;
-        }
-
-    }
-
-    /**
-     * Sonda ambiente através do olfato.
-     */
-    private void sondarComOlfato() {
-        // Sente presença do ladrão 
-        if (checaPresencaObjetoOlfato(Poupador.LADRAO) != Poupador.NADA_SENTIDO_PELO_OLFATO) {
-            ladraoProximoOlfato = true;
-        } else {
-            ladraoProximoOlfato = false;
-        }
-        // Sente presença do poupador
-        if (checaPresencaObjetoOlfato(Poupador.POUPADOR) != Poupador.NADA_SENTIDO_PELO_OLFATO) {
-            poupadorProximoOlfato = true;
-        } else {
-            poupadorProximoOlfato = false;
+    String objetivo = "";
+    public void determinarObjetivo() {
+        /*
+         * < 15 moedas
+         *  - probabilidade roubo <= 50%: MOEDA
+         *  - probabilidade roubo >  50%: FUGIR
+         * >= 15 moedas
+         *  - probabilidade roubo <  30%: BANCO
+         *  - probabilidade roubo >= 30%: FUGIR
+         */
+//        if (sensor.getNumeroDeMoedas() < MOEDAS_PARA_BANCO) {
+//            if (probabilidadeRoubo() <= 0.2) objetivo = "MOEDA";
+//            else objetivo = "FUGIR";
+//        } else if (sensor.getNumeroDeMoedas() > MOEDAS_PARA_BANCO) {
+//            if (probabilidadeRoubo() < 0.2) objetivo = "BANCO";
+//            else objetivo = "FUGIR";
+//        }
+        if (probabilidadeRoubo() > 0.15) objetivo = "FUGIR";
+        else {
+            if (sensor.getNumeroDeMoedas() < MOEDAS_PARA_BANCO) objetivo = "MOEDA";
+            else objetivo = "BANCO";
         }
     }
 
-    /**
-     * Tomar a decisão baseada na sondagem e retornar para onde ir.
-     * @return Posição que o personagem deve ir.
-     */
-    private int decisao() {
-        // Ladrão próximo
-        if (ladraoProximo) {
-            if (pastilhaProxima) {
-                // Se o ladrão estiver por perto pega.
-                //System.out.println("Ir para a pastilha!");
-                return irParaObjeto(Poupador.PASTILHA);
-            } else {
-                //System.out.println("Rebater ladrão!");
-                return andar(analisaSaidas(gerarSaidas()));
-            }     
-        }
-        // Situação em que a parede está ao redor.
-        if (paredeAoRedor) {
-            // Se pastilha perto de parede não pega.
-            if (detectarAoRedor(Poupador.PASTILHA) && !ladraoProximo) {
-                //System.out.println("Desviar de pastilha!");
-                return desviar(detectarAoRedorPos(Poupador.PASTILHA));
-            // Desviar da parede.
-            } else {
-                //System.out.println("Desviar parede!");
-                return desviar(detectarAoRedorPos(Poupador.PAREDE));
-            }
+    public static final double[] PROBABILIDADE_VISAO = {1, 0.75, 0.3, 0.2, 0.1};
+    public static final double[] PROBABILIDADE_OLFATO = {0, 0.9, 0.4, 0.2, 0.09, 0.02};
+    public double probabilidadeRoubo() {
+        // P(L) = (V(L) + F(L))/2
+        // V(L) = max distancia(L)
+        // F(L) = max ferormonio(L)
+        // M�dia ponderada de V(L) e F(L) onde o peso � a dist�ncia e o olfato.
 
-        }
-        // Perto da pastilha.
-        if (pastilhaProxima) {
-            // Se o ladrão estiver por perto pega.
-            if (ladraoProximo) {
-                //System.out.println("Ir para a pastilha!");
-                return irParaObjeto(Poupador.PASTILHA);
-            } // Se não desviar da pastilha
-            else {
-                if (detectarAoRedor(Poupador.PASTILHA)) {
-                    //System.out.println("Desviar de pastilha!");
-                    return desviar(detectarAoRedorPos(Poupador.PASTILHA));
+        double pesosVisao = 0, probVisao = 0;
+        double pesosOlfato = 0, probOlfato = 0;
+
+        int visao[] = sensor.getVisaoIdentificacao();
+        for (int i = 0; i < visao.length; i++) {
+            if (visao[i] >= POS_LADRAO) {
+                int distancia = distanciaManhattan(i, POSICAO_ATUAL);
+                if (distancia == 0) {
+                    pesosVisao += 1;
+                    probVisao += 1;
+                } else {
+                    pesosVisao += distancia;
+                    probVisao += distancia * PROBABILIDADE_VISAO[distancia];
                 }
             }
         }
-       
-        // Ladrão perto pela visão
-        if (ladraoProximoOlfato) {
-           // System.out.println("Rebater ladrão pelo olfato!");
-            return andar(rebater(checaPresencaObjetoOlfato(Poupador.LADRAO)));
-        }
 
-        // Perto do banco.
-        if (bancoProximo) {
-            // Se a quantidade de moedas acumuladas for maior que a constante definida, deixar dinheiro no banco.
-            if (sensor.getNumeroDeMoedas() >= Poupador.QUANT_MOEDAS_ACUMULADAS) {
-                //System.out.println("Ir deixar dinheiro no banco!");
-                return irParaObjeto(Poupador.BANCO);
-            } // Se não desviar do banco.
-            else {
-                if (detectarAoRedor(Poupador.BANCO)) {
-                    //System.out.println("Não deixa dinheiro no banco!");
-                    return desviar(detectarAoRedorPos(Poupador.BANCO));
-                }
-
+        int olfato[] = sensor.getAmbienteOlfatoLadrao();
+        for (int i = 0; i < olfato.length; i++) {
+            if (olfato[i] > 0) {
+                pesosOlfato += olfato[i];
+                probOlfato += olfato[i] * PROBABILIDADE_OLFATO[olfato[i]];
             }
         }
-        // Moeda Próximo.
-        if (moedaProxima) {
-            //System.out.println("Ir para moeda!");
-            return irParaObjeto(Poupador.MOEDA);
-        }
 
-        //System.out.println("Randômico!");
-        return randomicoRacional();
+        if (pesosVisao == 0) pesosVisao = 1;
+        if (pesosOlfato == 0) pesosOlfato = 1;
+        
+        return ((probVisao/pesosVisao)+(probOlfato/pesosOlfato))/2;
     }
 
-    /**
-     * Método para se encaminhar para um objeto.
-     * @param objeto Objeto alvo.
-     * @return Direcao que deve ser andada pra alcançar o objeto.
-     */
-    private int irParaObjeto(int objeto) {
-        if (retornaPosObjetoMaisProximo(objeto) != Poupador.OBJETO_FORA_DE_VISAO) {
-            return andar(retornaPosObjetoMaisProximo(objeto));
-        } else {
-            return 0;
-        }
-    }
+    List<Integer> direcoesPossiveis;
+    HashMap<Integer, Double> custoDirecoes;
+    public int sortearDirecao() {
+        // 1: Determinr quais dire��es eu posso me mover
+        // 2: Estabelecer custo de acordo com o objetivo
+        // 3: Escolher direcao de acordo com o maior custo
+        //    - Caso haja empate, realizar sorteio das dire��es
+        // 4: Retornar dire��o
+        int direcao = 0;
 
-    /**
-     * Retorna o objeto mais próximo dentro da visão.
-     * @param objeto Objeto alvo.
-     * @return Retorna a posição relativa �  visão do objeto mais próximo.
-     */
-    private int retornaPosObjetoMaisProximo(int objeto) {
-        for (int i = 11; i >= 6; i--) {
-            if (sensor.getVisaoIdentificacao()[i] == objeto) {
-                return i;
-            }
+        determinarDirecoesPossiveis();
+        estabelecerCustoDirecoes();
+        if (objetivo.equals("FUGIR")) {
+            System.out.println(sensor.getPosicao() + " - custo direcoes = " + custoDirecoes);
         }
-        for (int i = 12; i <= 17; i++) {
-            if (sensor.getVisaoIdentificacao()[i] == objeto) {
-                return i;
-            }
-        }
-        for (int i = 5; i >= 0; i--) {
-            if (sensor.getVisaoIdentificacao()[i] == objeto) {
-                return i;
-            }
-        }
-        for (int i = 18; i < sensor.getVisaoIdentificacao().length; i++) {
-            if (sensor.getVisaoIdentificacao()[i] == objeto) {
-                return i;
-            }
-        }
-        return Poupador.OBJETO_FORA_DE_VISAO;
-    }
+        Set<Entry<Integer, Double>> entries = custoDirecoes.entrySet();
 
-    private int retornaPosLadraooMaisProximo() {
-        for (int i = 11; i >= 6; i--) {
-            if (sensor.getVisaoIdentificacao()[i] >= Poupador.LADRAO) {
-                return i;
-            }
-        }
-        for (int i = 12; i <= 17; i++) {
-            if (sensor.getVisaoIdentificacao()[i] >= Poupador.LADRAO) {
-                return i;
-            }
-        }
-        for (int i = 5; i >= 0; i--) {
-            if (sensor.getVisaoIdentificacao()[i] >= Poupador.LADRAO) {
-                return i;
-            }
-        }
-        for (int i = 18; i < sensor.getVisaoIdentificacao().length; i++) {
-            if (sensor.getVisaoIdentificacao()[i] >= Poupador.LADRAO) {
-                return i;
-            }
-        }
-        return Poupador.OBJETO_FORA_DE_VISAO;
-    }
-
-    /**
-     * Método pra calcular pra que lado deve ir de acordo com a visão.
-     * @param pos Posição da visão alvo.
-     * @return Retorna pra que direcao deve se andar. 
-     */
-    private int andar(int pos) {
-        for (int i = 0; i < cima.length; i++) {
-            if (cima[i] == pos) {
-                return 1;
-            }
-        }
-        for (int i = 0; i < baixo.length; i++) {
-            if (baixo[i] == pos) {
-                return 2;
-            }
-        }
-        for (int i = 0; i < esquerda.length; i++) {
-            if (esquerda[i] == pos) {
-                return 4;
-            }
-        }
-        for (int i = 0; i < direita.length; i++) {
-            if (direita[i] == pos) {
-                return 3;
-            }
-        }
-        return 0;
-    }
-
-    /**
-     * Detecta se o objeto passado por parâmetro está ao redor do personagem.
-     * @param objeto Objeto alvo.
-     * @return Booleano indicando se a afirmação é verdade ou falsa. 
-     */
-    private boolean detectarAoRedor(int objeto) {
-        int up, down, left, right;
-        up = sensor.getVisaoIdentificacao()[7];
-        down = sensor.getVisaoIdentificacao()[16];
-        left = sensor.getVisaoIdentificacao()[11];
-        right = sensor.getVisaoIdentificacao()[12];
-        if (up == objeto) {
-            return true;
-        } else if (down == objeto) {
-            return true;
-        } else if (left == objeto) {
-            return true;
-        } else if (right == objeto) {
-            return true;
-        }
-        return false;
-
-    }
-
-    /**
-     * Retorna em que posição ao redor está o objeto.
-     * @param objeto Objeto a ser testado..
-     * @return Posição em que o objeto se encontra..
-     */
-    private int detectarAoRedorPos(int objeto) {
-        int up, down, left, right;
-        up = sensor.getVisaoIdentificacao()[7];
-        down = sensor.getVisaoIdentificacao()[16];
-        left = sensor.getVisaoIdentificacao()[11];
-        right = sensor.getVisaoIdentificacao()[12];
-        if (up == objeto) {
-            return 1;
-        } else if (down == objeto) {
-            return 2;
-        } else if (left == objeto) {
-            return 4;
-        } else if (right == objeto) {
-            return 3;
-        }
-        return 0;
-
-    }
-
-    /**
-     * Método com intuito de fugir de algum objeto de acordo com a visão.
-     * @param pos Posição em qual se deseja fugir.
-     * @return Retorna a posição para que se deve ir para fugir.
-     */
-    private int rebater(int pos) {
-        switch (pos) {
-            case 6: {
-                return 23;
-            }
-            case 7: {
-                return 21;
-            }
-            case 8: {
-                return 19;
-            }
-            case 11: {
-                return 13;
-            }
-            case 12: {
-                return 10;
-            }
-            case 17: {
-                return 0;
-            }
-            case 16: {
-                return 2;
-            }
-            case 15: {
-                return 4;
-            }
-            default: {
-                return 23 - pos;
-            }
-
-        }
-    }
-
-    /**
-     * Rebater uma direção a ser seguida.
-     * @param dir Direção a ser seguida
-     * @return Direção repatida. 
-     */
-    private int rebaterDirProx(int dir) {
-        switch (dir) {
-            case 1: {
-                return 2;
-            }
-            case 2: {
-                return 1;
-            }
-            case 3: {
-                return 4;
-            }
-            case 4: {
-                return 3;
-            }
-            default: {
-                return 1;
-            }
-
-        }
-    }
-
-    /**
-     * Retorna direção aleatória para andar.
-     * @return Direção aleatória para andar.
-     */
-    private int randomDir() {
-        return new Random().nextInt(5);
-    }
-
-    /**
-     * Retorna qualquer direção diferente da passada por parametro.
-     * @param dir Posição. 
-     * @return Posição diferente.
-     */
-    private int desviar(int dir) {
-        int dirRan = 0;
-        do {
-            dirRan = randomDir();
-        } while (dirRan == dir);
-        return dirRan;
-    }
-
-    /**
-     *  Retorna qtos elementos de um determinado objeto estão perto, e também retorna a sua posição.
-     * @param objeto
-     * @return Lista com a posição dos Objetos
-     */
-    private List<Integer> retornaQtdObjetoMaisProximo(int objeto) {
-        List ret = new ArrayList<Integer>();
-        for (int i = 11; i >= 0; i--) {
-            if (sensor.getVisaoIdentificacao()[i] == objeto) {
-                ret.add(i);
-            }
-        }
-        for (int i = 12; i < sensor.getVisaoIdentificacao().length; i++) {
-            if (sensor.getVisaoIdentificacao()[i] == objeto) {
-                ret.add(i);
-            }
-        }
-        return ret;
-    }
-
-    private List<Integer> retornaQtdLadraoMaisProximo() {
-        List ret = new ArrayList<Integer>();
-        for (int i = 11; i >= 0; i--) {
-            if (sensor.getVisaoIdentificacao()[i] >= Poupador.LADRAO) {
-                ret.add(i);
-            }
-        }
-        for (int i = 12; i < sensor.getVisaoIdentificacao().length; i++) {
-            if (sensor.getVisaoIdentificacao()[i] >= Poupador.LADRAO) {
-                ret.add(i);
-            }
-        }
-        return ret;
-    }
-
-    /**
-     * Novo Método rebater, agora retornando mais de 1 opção de saida.
-     * @param pos
-     * @return
-     */
-    private List<Integer> rebaterNSaidas(int pos) {
-        List<Integer> ret = new ArrayList<Integer>();
-        switch (pos) {
-            case 0: {
-                ret.add(19);
-                ret.add(20);
-                ret.add(21);
-                ret.add(22);
-                ret.add(23);
-                return ret;
-            }
-            case 1: {
-                ret.add(19);
-                ret.add(20);
-                ret.add(21);
-                ret.add(22);
-                ret.add(23);
-                return ret;
-            }
-            case 2: {
-                ret.add(19);
-                ret.add(20);
-                ret.add(21);
-                ret.add(22);
-                ret.add(23);
-                return ret;
-            }
-            case 3: {
-                ret.add(19);
-                ret.add(20);
-                ret.add(21);
-                ret.add(22);
-                ret.add(23);
-                return ret;
-            }
-            case 4: {
-                ret.add(19);
-                ret.add(20);
-                ret.add(21);
-                ret.add(22);
-                ret.add(23);
-                return ret;
-            }
-            case 5: {
-                ret.add(19);
-                ret.add(20);
-                ret.add(21);
-                ret.add(22);
-                ret.add(23);
-                ret.add(3);
-                ret.add(4);
-                return ret;
-            }
-            case 6: {
-                ret.add(19);
-                ret.add(20);
-                ret.add(21);
-                ret.add(22);
-                ret.add(23);
-                ret.add(3);
-                ret.add(4);
-                return ret;
-            }
-            case 7: {
-                ret.add(19);
-                ret.add(20);
-                ret.add(21);
-                ret.add(22);
-                ret.add(23);
-                ret.add(0);
-                ret.add(4);
-                return ret;
-            }
-            case 8: {
-                ret.add(19);
-                ret.add(20);
-                ret.add(21);
-                ret.add(22);
-                ret.add(23);
-                ret.add(0);
-                ret.add(1);
-                return ret;
-            }
-            case 9: {
-                ret.add(19);
-                ret.add(20);
-                ret.add(21);
-                ret.add(22);
-                ret.add(23);
-                ret.add(0);
-                ret.add(1);
-                return ret;
-            }
-            case 14: {
-                ret.add(0);
-                ret.add(1);
-                ret.add(2);
-                ret.add(3);
-                ret.add(4);
-                ret.add(22);
-                ret.add(23);
-                return ret;
-            }
-            case 15: {
-                ret.add(0);
-                ret.add(1);
-                ret.add(2);
-                ret.add(3);
-                ret.add(4);
-                ret.add(22);
-                ret.add(23);
-                return ret;
-            }
-            case 16: {
-                ret.add(0);
-                ret.add(1);
-                ret.add(2);
-                ret.add(3);
-                ret.add(4);
-                ret.add(19);
-                ret.add(23);
-                return ret;
-            }
-            case 17: {
-                ret.add(0);
-                ret.add(1);
-                ret.add(2);
-                ret.add(3);
-                ret.add(4);
-                ret.add(19);
-                ret.add(20);
-                return ret;
-            }
-            case 18: {
-                ret.add(0);
-                ret.add(1);
-                ret.add(2);
-                ret.add(3);
-                ret.add(4);
-                ret.add(19);
-                ret.add(20);
-                return ret;
-            }
-            case 19: {
-                ret.add(0);
-                ret.add(1);
-                ret.add(2);
-                ret.add(3);
-                ret.add(4);
-                return ret;
-            }
-            case 20: {
-                ret.add(0);
-                ret.add(1);
-                ret.add(2);
-                ret.add(3);
-                ret.add(4);
-                return ret;
-            }
-            case 21: {
-                ret.add(0);
-                ret.add(1);
-                ret.add(2);
-                ret.add(3);
-                ret.add(4);
-                return ret;
-            }
-            case 22: {
-                ret.add(0);
-                ret.add(1);
-                ret.add(2);
-                ret.add(3);
-                ret.add(4);
-                return ret;
-            }
-            case 23: {
-                ret.add(0);
-                ret.add(1);
-                ret.add(2);
-                ret.add(3);
-                ret.add(4);
-                return ret;
-            }
-            default: {
-                ret.add(0);
-                ret.add(1);
-                ret.add(2);
-                ret.add(3);
-                ret.add(4);
-                ret.add(19);
-                ret.add(20);
-                ret.add(21);
-                ret.add(22);
-                ret.add(23);
-                return ret;
-            }
-
-        }
-    }
-
-    public List<List<Integer>> gerarSaidas() {
-        List<List<Integer>> ret = new Vector<List<Integer>>();
-        List<Integer> ladroes = retornaQtdLadraoMaisProximo();
-        for (Integer i : ladroes) {
-            ret.add(rebaterNSaidas(i));
-        }
-        return ret;
-    }
-
-    public int analisaSaidas(List<List<Integer>> saidas) {
-        int retorno = 0;
-        Vector<Integer> ret = new Vector<Integer>();
-        if (saidas.size() < 2) {
+        if (custoDirecoes.size() > 1) {
             Random r = new Random();
-            int temp = r.nextInt(saidas.get(0).size());
-            retorno = saidas.get(0).get(temp);
-            //System.out.println("desviei do lado para " + retorno);
+            int pos = r.nextInt(custoDirecoes.size()), i = 0;
 
+            for (Entry<Integer, Double> e : entries) {
+                if (pos == i) {
+                    direcao = e.getKey();
+
+                    break;
+                } else i++;
+            }
         } else {
+            for (Entry<Integer, Double> e : entries) {
+                direcao = e.getKey();
 
-            for (int i = 0; i < saidas.size(); i++) {
-                for (int k = i + 1; k < saidas.size(); k++) {
-                    for (int l = 0; l < saidas.get(k).size(); l++) {
-                        if (saidas.get(i).contains(saidas.get(k).get(l))) {
-                            ret.add(saidas.get(k).get(l));
-                        }
-                    }
-                }
-            }
-            if (ret.size() == 0) {
-                //System.out.println("hitek, não sei o q fazer.... :S");
-                retorno = 1;
-            } else {
-                Random r = new Random();
-                int temp = r.nextInt(ret.size());
-                retorno = ret.get(temp);
-                //System.out.println("desviei do lado para " + retorno);
-
+                break;
             }
         }
 
-        return retorno;
+        return traduzirDirecao(direcao);
     }
 
-    /**
-     * Checa presença de objeto através do olfato.
-     * @param objeto Objeto a ser checado.
-     * @return Retorna a informação se o bojeto está por ali
-     */
-    private int checaPresencaObjetoOlfato(int objeto) {
-        for (int i = 3; i >= 0; i--) {
-            if (escolherObjetoOlfato(objeto)[i] >= Poupador.UMA_UNID_ATRAS) {
-                return i;
-            }
-        }
-        for (int i = 4; i < sensor.getAmbienteOlfatoLadrao().length; i++) {
-            if (escolherObjetoOlfato(objeto)[i] >= Poupador.UMA_UNID_ATRAS) {
-                return i;
-            }
-        }
-        return Poupador.NADA_SENTIDO_PELO_OLFATO;
+    public void determinarDirecoesPossiveis() {
+        direcoesPossiveis = new ArrayList();
+
+        if (podeMover(CIMA)) direcoesPossiveis.add(CIMA);
+        if (podeMover(BAIXO)) direcoesPossiveis.add(BAIXO);
+        if (podeMover(ESQUERDA)) direcoesPossiveis.add(ESQUERDA);
+        if (podeMover(DIREITA)) direcoesPossiveis.add(DIREITA);
     }
 
-    /**
-     * Retorna o olfato requisitado
-     * @param objeto objeto a ser identificado pelo olfato.
-     * @return Retorna o vetor correto.
-     */
-    private int[] escolherObjetoOlfato(int objeto) {
-        if (objeto == Poupador.LADRAO) {
-            return sensor.getAmbienteOlfatoLadrao();
-        } else {
-            return sensor.getAmbienteOlfatoPoupador();
-        }
+    public boolean podeMover(int direcao) {
+        int posicao = sensor.getVisaoIdentificacao()[direcao];
+
+        if (!querPastilha() && posicao == POS_PASTILHA) return false;
+        else if (sensor.getNumeroDeMoedas() == 0 && posicao == POS_BANCO) return false;
+
+        return (posicao != POS_FORA_AMBIENTE && posicao != POS_SEM_VISAO && posicao != POS_PAREDE);
     }
 
-    /**
-     * Randomico pra não voltar.
-     * @return Retorna direção que deve ser andada.
-     */
-    private int randomicoRacional() {
-        int dirAtual;
-        int dirAtualCont;
-        do {
-            dirAtual = randomDir();
-            dirAtualCont = rebaterDirProx(dirAtual);
-        } while (dirAtual == dirAnt);
-        dirAnt = dirAtualCont;
-        return dirAtual;
+    public void estabelecerCustoDirecoes() {
+        // Estabelecer os custos obtendo as poss�veis posi��es randomicamente
+        custoDirecoes = new HashMap();
+        while (direcoesPossiveis.size() > 0) {
+            Random r = new Random();
+
+            int pos = r.nextInt(direcoesPossiveis.size());
+            int valor = direcoesPossiveis.get(pos);
+            double custo = funcao(valor);
+
+            //System.out.println(sensor.getPosicao() + " - posicao=" + valor + ", funcao=" + custo);
+            custoDirecoes.put(valor, custo);
+
+            direcoesPossiveis.remove(pos);
+        }
+
+        // Deixar somente no hashmap valores que t�m custo igual
+        HashMap<Integer,Double> mapa = new HashMap();
+        double maiorCusto = 0;
+        Set<Entry<Integer, Double>> entries = custoDirecoes.entrySet();
+
+        for (Entry<Integer, Double> e : entries) {
+            if (e.getValue() > maiorCusto) maiorCusto = e.getValue();
+        }
+
+        for (Entry<Integer, Double> e : entries) {
+            if (e.getValue() == maiorCusto) mapa.put(e.getKey(), e.getValue());
+        }
+
+        custoDirecoes = mapa;
+    }
+
+    public double funcao(int direcao) {
+        if (objetivo.equals("MOEDA") || objetivo.equals("BANCO")) {
+            return funcaoMoeda(direcao);
+        } else if (objetivo.equals("FUGIR")) {
+            return funcaoFugir(direcao);
+        } else if (objetivo.equals("BANCO")) {
+
+        }
+
+        return 0;
+    }
+
+    public static final double[] PESOS_MOEDA = {1, 0.75, 0.3, 0.1};
+    public double funcaoMoeda(int direcao) {
+        double f = 0;
+        int visao[] = sensor.getVisaoIdentificacao();
+        int coord[] = null;
+
+        if (direcao == CIMA) coord = COORDENADA_CIMA;
+        else if (direcao == BAIXO) coord = COORDENADA_BAIXO;
+        else if (direcao == ESQUERDA) coord = COORDENADA_ESQUERDA;
+        else if (direcao == DIREITA) coord = COORDENADA_DIREITA;
+
+        for (int i = 0; i < coord.length; i++) {
+            if (visao[coord[i]] == POS_MOEDA) {
+                int distancia = distanciaManhattan(coord[i], direcao);
+
+                if (distancia == 0) f += 1;
+                else f += distancia * PESOS_MOEDA[distancia];
+
+                //System.out.println(direcao + ": ponto=" + coord[i] + ", distancia=" + distancia + ", final=" + (distancia * PESOS_MOEDA[distancia]));
+            }
+        }
+
+        return f;
+    }
+
+    public static final double[] PESOS_FUGIR = {-1, -0.75, -0.3, -0.1};
+    public static final double[] PESOS_OLFATO = {0, -0.9, -0.4, -0.2, -0.09, -0.02};
+    public double funcaoFugir(int direcao) {
+        double f = 7; // Fun��o come�a com valor 7 e � penalizada durante a execu��o
+        int visao[] = sensor.getVisaoIdentificacao();
+        int coord[] = null;
+
+        if (direcao == CIMA) coord = COORDENADA_CIMA;
+        else if (direcao == BAIXO) coord = COORDENADA_BAIXO;
+        else if (direcao == ESQUERDA) coord = COORDENADA_ESQUERDA;
+        else if (direcao == DIREITA) coord = COORDENADA_DIREITA;
+
+        for (int i = 0; i < coord.length; i++) {
+            if (visao[coord[i]] >= POS_LADRAO) {
+                int distancia = distanciaManhattan(coord[i], direcao);
+
+                if (distancia == 0) f += -1;
+                else f += distancia * PESOS_FUGIR[distancia] * 2;
+
+                System.out.println(direcao + ": ponto=" + coord[i] + ", distancia=" + distancia + ", final=" + (distancia * PESOS_FUGIR[distancia]));
+            }
+        }
+
+        // Avaliar olfato
+        if (direcao == CIMA) coord = new int[]{0, 1, 2};
+        else if (direcao == BAIXO) coord = new int[]{5, 6, 7};
+        else if (direcao == ESQUERDA) coord = new int[]{0, 3, 5};
+        else if (direcao == DIREITA) coord = new int[]{2, 4, 7};
+
+        int olfato[] = sensor.getAmbienteOlfatoLadrao();
+        for (int i = 0; i < coord.length; i++) {
+            if (olfato[i] > 0) {
+                System.out.println(direcao + "(olfato): tempo=" + olfato[i]);
+                f += olfato[i] * PESOS_OLFATO[olfato[i]];
+
+            } 
+        }
+
+        return f;
+    }
+
+    public HashMap matrizVisao = new HashMap();
+    {
+        matrizVisao.put("0", new int[]{1, 1});
+        matrizVisao.put("1", new int[]{1, 2});
+        matrizVisao.put("2", new int[]{1, 3});
+        matrizVisao.put("3", new int[]{1, 4});
+        matrizVisao.put("4", new int[]{1, 5});
+        matrizVisao.put("5", new int[]{2, 1});
+        matrizVisao.put("6", new int[]{2, 2});
+        matrizVisao.put("7", new int[]{2, 3});
+        matrizVisao.put("8", new int[]{2, 4});
+        matrizVisao.put("9", new int[]{2, 5});
+        matrizVisao.put("10", new int[]{3, 1});
+        matrizVisao.put("11", new int[]{3, 2});
+        matrizVisao.put("99", new int[]{3, 3}); // Posicao Atual
+        matrizVisao.put("12", new int[]{3, 4});
+        matrizVisao.put("13", new int[]{3, 5});
+        matrizVisao.put("14", new int[]{4, 1});
+        matrizVisao.put("15", new int[]{4, 2});
+        matrizVisao.put("16", new int[]{4, 3});
+        matrizVisao.put("17", new int[]{4, 4});
+        matrizVisao.put("18", new int[]{4, 5});
+        matrizVisao.put("19", new int[]{5, 1});
+        matrizVisao.put("20", new int[]{5, 2});
+        matrizVisao.put("21", new int[]{5, 3});
+        matrizVisao.put("22", new int[]{5, 4});
+        matrizVisao.put("23", new int[]{5, 5});
+    }
+
+    public int distanciaManhattan(int destino, int origem) {
+        int distancia = 0;
+        int coordOrigem[] = null;
+        int coordDestino[] = null;
+
+        coordDestino = (int[]) matrizVisao.get(destino + "");
+        coordOrigem = (int[]) matrizVisao.get(origem + "");
+
+        distancia = Math.abs(coordOrigem[0] - coordDestino[0]) + Math.abs(coordOrigem[1] - coordDestino[1]);
+
+        return distancia;
+    }
+
+    public int traduzirDirecao(int direcao) {
+        int real = (int) (Math.random() * 5);
+
+        switch (direcao) {
+            case CIMA:
+                real = 1;
+                break;
+            case BAIXO:
+                real = 2;
+                break;
+            case DIREITA:
+                real = 3;
+                break;
+            case ESQUERDA:
+                real = 4;
+                break;
+        }
+
+        return real;
+    }
+
+    public boolean querPastilha() {
+        return (sensor.getNumeroDeMoedas() > MOEDAS_PARA_BANCO+5 && (objetivo.equals("FUGIR") || objetivo.equals("BANCO")));
+    }
+
+    public int direcaoOposta(int direcao) {
+        if (direcao == CIMA) return BAIXO;
+        else if (direcao == BAIXO) return CIMA;
+        else if (direcao == ESQUERDA) return DIREITA;
+        else if (direcao == DIREITA) return ESQUERDA;
+
+        return 0;
     }
 }
